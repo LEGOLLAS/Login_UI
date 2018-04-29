@@ -1,0 +1,77 @@
+<!DOCTYPE html>
+
+<html>
+<head>
+    <meta charset="utf-8" />
+
+    <script type="text/javascript" charset="utf-8" src="js/jquery-1.11.1.min.js"></script>
+    <script type="text/javascript" charset="utf-8" src="oauth/jquery.cookie.js"></script>
+    <script type="text/javascript" charset="utf-8" src="oauth/naverLogin.js"></script>
+
+
+
+</head>
+<body>
+
+<script type="text/javascript">
+    function generateState() {
+        var oDate = new Date();
+        return oDate.getTime();
+    }
+    function saveState(state) {
+        $.removeCookie("state_token");
+        $.cookie("state_token", state);
+    }
+    var naver = NaverAuthorize({
+        client_id : "60VMDIkuSF16NYq_op5u",
+        redirect_uri : "http://127.0.0.1/naver.html",
+        client_secret : "xWW3NaAYKM"
+    });
+
+     function loginNaver() {
+        var state = generateState();
+        saveState(state);
+        naver.login(state);
+    }
+
+    $("#NaverIdLoginBTN").click( function () {
+        var state = generateState();
+        saveState(state);
+        naver.login(state);
+    });
+</script>
+
+<script type="text/javascript">
+    window.onload=function(){
+
+        checkLoginState();
+    }
+    var tokenInfo = { access_token:"" , refresh_token:"" };
+    function checkLoginState() {
+    var state = $.cookie("state_token");
+    if(naver.checkAuthorizeState(state) === "connected") {
+        naver.getAccessToken(function(data) {
+
+            var response = data._response.responseJSON;
+            if(response.error === "fail") {
+
+                return ;
+            }
+            tokenInfo.access_token = response.access_token;
+            tokenInfo.refresh_token = response.refresh_token;
+
+
+            console.log("success to get access token", response);
+        });
+    }
+    else
+    {
+        return ;
+    }
+}
+</script>
+<div>
+    <button onclick='loginNaver()'>네이버 아이디로 로그인</button>
+</div>
+</body>
+</html>
